@@ -17,7 +17,12 @@
     </div>
 @endif
 
-<a href="{{ route('course.create') }}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Insert Course</a>
+@can('insert-course')
+    <a href="{{ route('course.create') }}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Insert Course</a>
+@endcan
+
+
+
 <div class="container my-4 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
     @foreach ($courses as $course)
         <div class="bg-white dark:bg-slate-800 rounded-lg px-6 py-8 ring-1 ring-slate-900/5 shadow-xl">
@@ -30,19 +35,26 @@
             </p>
             <div class="mt-10 flex items-center justify-center gap-x-6">
                 <a href="/course/view/{{ $course['id'] }}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Show Details</a>
-                <a href="{{ route('course.edit', $course->id)  }}" class="rounded-md bg-indigo-400 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Edit</a>
-                @if ($course->students->count()==0)
-                <form action="{{ route('course.delete', $course->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this course?');" style="display: inline;">
-                    @csrf
-                    @method('delete')
-                    
-                    <button type="submit" class="rounded-md bg-red-400 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200">
-                        Delete
-                    </button>
-                </form>
-                @else
-                    <button disabled class="rounded-md bg-gray-400 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-200">Delete</button>
-                @endif
+                
+                @can('update-course')
+                <a href="{{ route('course.edit', $course->id)  }}" class="rounded-md bg-indigo-400 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Edit</a>    
+                @endcan
+                
+                @can('delete-course')
+                    @if ($course->students->count()==0)
+                    <form action="{{ route('course.delete', $course->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this course?');" style="display: inline;">
+                        @csrf
+                        @method('delete')
+                        
+                        <button type="submit" class="rounded-md bg-red-400 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200">
+                            Delete
+                        </button>
+                    </form>
+                    @else
+                        <button disabled class="rounded-md bg-gray-400 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-200">Delete</button>
+                    @endif
+                @endcan
+                
             </div>
         </div>  
     @endforeach

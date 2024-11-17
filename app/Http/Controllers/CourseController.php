@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
 use App\Models\Unit;
+use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Response;
 
 class CourseController extends Controller
 {
@@ -27,6 +31,12 @@ class CourseController extends Controller
     }
 
     public function insert(Request $request){
+
+        //check authorization
+        if(!Gate::allows('insert-course')){
+            abort(403);
+        }
+
         //data validation
         $request->validate([
             'course_code'=>'required|unique:courses|size:6', //unique harus ada 1 parameter nama table
@@ -65,6 +75,11 @@ class CourseController extends Controller
     }
 
     public function update(Request $request, Course $course){
+        //check authorization
+        if(!Gate::allows('update-course')){
+            abort(403);
+        }
+
         //data validation
         $request->validate([
             'course_code'=>'required|unique:courses,course_code,' . $course->id . '|size:6', //unique update ada param table, dan field miliknya sendiri
@@ -98,7 +113,52 @@ class CourseController extends Controller
     }
 
     public function delete(Course $course){
+        //check authorization
+        if(!Gate::allows('delete-course')){
+            abort(403);
+        }
         $course->delete();
         return redirect('/courses')->with('success', 'Course deleted successfully!');
+    }
+
+    public function api_get_courses(Request $request){
+
+        //get all field on spesific course id
+        //$data = Course::find($request->id);
+
+        //spesific field
+        $data = Course::select(['course_code','course_name'])->find($request->id);
+
+        if(isset($data)){
+            //jika data ditemukan
+            return Response::json(['data'=>$data, 'message'=>'Course found'], 200);
+        }
+        //jika data tidak ditemukan
+        return Response::json(['message'=>'Course not found'],404);
+        //abort(404);
+    }
+
+    //function luar
+    public function request_api_to_course(Request $request){
+        $response = Http::withToken('1|uMULdyDknAIKL8bwBaQB7QXjmO7MfkljXHk56UED1f52a874')->get('http://wfd2.test/api/get/courses/'.$request->id);
+
+        $data = $response->json();
+        $status = $response->status();
+        if(isset($data['data'])){
+            return Response::json(['data'=>$data['data']],$status);
+        }
+        
+        return Response::json(['message'=>$data['message']],$status);
+
+    }
+
+    public function api_get_token(Request $request){
+        if(Auth::attempt(['email' => 'user@user.com', 'password' => 'user'])){
+            $auth=Auth::user();
+            $data['token']=$auth->createToken('auth_token')->plainTextToken;
+
+            return Response::json(['data'=>$data],200);
+        }
+
     }
 }

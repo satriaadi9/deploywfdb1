@@ -5,6 +5,7 @@
 @endsection
 
 @section('content')
+
 <div class="container my-4 mx-auto">
     <form action="{{ route('course.insert') }}" method="POST" enctype="multipart/form-data">
         @csrf

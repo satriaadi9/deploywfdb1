@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Models\Course;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
@@ -50,21 +51,49 @@ Route::get('/tail', function(){
     return view('tail');
 });
 
-Route::get('/courses', function(){
-    return view('courses', ['title'=> 'All Courses','courses'=>Course::with(['unit'])->get()]);
+Route::get('/login', [AuthController::class, 'index'])->name('login')->middleware('guest');
+
+Route::post('/login_auth', [AuthController::class, 'login_authenticate'])->name('login.post');
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Route::get('/courses', function(){
+//     return view('courses', ['title'=> 'All Courses','courses'=>Course::with(['unit'])->get()]);
+// })->withoutMiddleware('check')->name('courses');
+
+Route::middleware(['auth'])->group(function(){
+
+    Route::middleware(['role:LECTURER,DEAN,STUDENT'])->group(function(){
+        Route::get('/courses', function(){
+            return view('courses', ['title'=> 'All Courses','courses'=>Course::with(['unit'])->get()]);
+        })->name('courses');
+        Route::get('/course/view/{course:id}', [CourseController::class, 'show']);
+    });
+
+    Route::middleware(['role:LECTURER,DEAN'])->group(function(){
+        Route::get('/course/create', [CourseController::class, 'create'])->name('course.create');
+        Route::get('/course/edit/{course:id}', [CourseController::class, 'edit'])->name('course.edit');
+        Route::post('/course/insert', [CourseController::class, 'insert'])->name('course.insert');
+        Route::put('/course/update/{course:id}', [CourseController::class, 'update'])->name('course.update');
+        Route::delete('/course/delete/{course:id}', [CourseController::class, 'delete'])->name('course.delete');
+    });
+    
+    
+    
 });
 
-Route::get('/course/view/{course:id}', [CourseController::class, 'show']);
 
-Route::get('/course/create', [CourseController::class, 'create'])->name('course.create');
+Route::get('/request/to/api/course/{id}', [CourseController::class, 'request_api_to_course']);
 
-Route::post('/course/insert', [CourseController::class, 'insert'])->name('course.insert');
+// Route::get('/course/view/{course:id}', [CourseController::class, 'show']);
 
-Route::get('/course/edit/{course:id}', [CourseController::class, 'edit'])->name('course.edit');
+// Route::get('/course/create', [CourseController::class, 'create'])->name('course.create');
 
-Route::put('/course/update/{course:id}', [CourseController::class, 'update'])->name('course.update');
+//Route::post('/course/insert', [CourseController::class, 'insert'])->name('course.insert');
 
-Route::delete('/course/delete/{course:id}', [CourseController::class, 'delete'])->name('course.delete');
+// Route::get('/course/edit/{course:id}', [CourseController::class, 'edit'])->name('course.edit');
+
+
 
 
 // Route::get('/courses', function(){

@@ -19,6 +19,12 @@
         <a href="#" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">Class Assignments</a>
         <a href="#" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">Schedule</a>
         <a href="/courses" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">Courses</a>
+        @auth
+          <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">Logout</button>
+          </form>
+        @endauth
       </div>
       <div class="hidden lg:flex lg:flex-1 lg:justify-end">
         <button id="theme-toggle" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white" >Toogle Theme <span aria-hidden="true">&rarr;</span></button>
